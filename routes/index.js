@@ -1,9 +1,13 @@
-var express = require('express');
-var router = express.Router();
+import express from "express";
+import {
+  loginCheck
+} from "../controllers/controller.js";
+const router = express.Router();
+const app = express();
+router.post('/loginCheck', loginCheck);
+router.get('/', (req, res) => {
+  res.send('<h1>Please login</h1>');
 
-/* GET home page. */
-router.get('/', function(req, res, next) {
-  res.render('index', { title: 'Express' });
 });
+export default router;
 
-module.exports = router;
