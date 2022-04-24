@@ -44,29 +44,47 @@ export const sendClassData = async (req, res) => {
 
     try {
         const {username} = req.body;
-        console.log(username);
-        var userIdReceiver = '';
-        const userId = await(getUserId(username).then(function(rows) {
-            userIdReceiver = rows;
+        var userId = '';
+        const userIdReceiver = await(getUserId(username).then(function(rows) {
+            userId = rows;
         }));
         db.query(
-            "SELECT c.classId, c.teacherId FROM classtable AS c, userslogintable WHERE c.teacherId = ?",
-            [userIdReceiver],
+            "SELECT c.classId, c.teacherId, c.subjectId, c.classNum FROM classtable AS c, userslogintable WHERE c.teacherId = ?",
+            [userId],
             function (error, results, fields) {
                 try {
-                    console.log(userIdReceiver);
+                    let ticker = 0;
+                    for(let row of results) {
+                        db.query('SELECT subjectName FROM subjecttable WHERE subjectId = ?', [row.subjectId], function (error, resultsSub, fields) {
+                            try {
+                                if(ticker === results.length -1) {
+                                    row["subjectId"] = resultsSub[0]["subjectName"];
+                                    res.json(results);
+                                    console.log("done")
+                                }else {
 
-                    res.json(results);
-                    //console.log(results);
+                                    row["subjectId"] = resultsSub[0]["subjectName"];
+                                    console.log(row);
+                                    ticker = ticker + 1;
+                                }
+
+                            } catch (err) {
+                                res.send("<h1>Error</h1>");
+                                console.log(err);
+                            }
+                        });
+                    }
+
                 } catch (err) {
                     res.send("<h1>Error</h1>");
-                }
+                    console.log(err);
 
-            });
+                }});
     } catch (err) {
         res.send("<h1>Error</h1>");
+        console.log(err);
+
     };
 
+
 }
-
-
